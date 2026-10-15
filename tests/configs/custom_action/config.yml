@@ -1,0 +1,10 @@
+# Input rail backed by a Python action from actions.py in this folder.
+models:
+  - type: main
+    engine: openai
+    model: mock-model
+
+rails:
+  input:
+    flows:
+      - check blocked words

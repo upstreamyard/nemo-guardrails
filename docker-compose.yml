@@ -1,0 +1,16 @@
+# NeMo Guardrails with OpenAI as the LLM:
+#   OPENAI_API_KEY=sk-... docker compose up -d
+# Fully local with Ollama instead: examples/ollama/docker-compose.yml
+services:
+  nemo-guardrails:
+    image: upstreamyard/nemo-guardrails:0.24
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY}
+      # Chat UI for trying out the rails at http://localhost:8000 (not for production):
+      # NEMO_GUARDRAILS_DISABLE_CHAT_UI: "false"
+    # Your own configuration (config.yml, prompts, Colang files, actions.py):
+    # volumes:
+    #   - ./config:/config:ro

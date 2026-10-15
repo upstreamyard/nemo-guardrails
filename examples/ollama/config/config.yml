@@ -1,0 +1,19 @@
+# Self check rails with a local Ollama model. The model and endpoint are set here, so
+# the Chat UI (which sends no model name) uses them too.
+models:
+  - type: main
+    engine: ollama
+    model: qwen2.5:1.5b
+    parameters:
+      base_url: http://ollama:11434/v1
+
+rails:
+  input:
+    flows:
+      - self check input
+  output:
+    flows:
+      - self check output
+    streaming:
+      enabled: true
+      stream_first: false

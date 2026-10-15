@@ -1,0 +1,11 @@
+define user express greeting
+  "Hello"
+  "Hi"
+  "Good morning"
+
+define bot express greeting
+  "Hello from a dialog rail!"
+
+define flow greeting
+  user express greeting
+  bot express greeting

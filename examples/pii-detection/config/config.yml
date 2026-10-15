@@ -1,0 +1,26 @@
+# Blocks user messages that contain an email address, phone number or credit card number,
+# and masks them in answers. Needs the image from ../Dockerfile.
+models:
+  - type: main
+    engine: openai
+    model: gpt-4o-mini
+
+rails:
+  config:
+    sensitive_data_detection:
+      input:
+        entities:
+          - EMAIL_ADDRESS
+          - PHONE_NUMBER
+          - CREDIT_CARD
+      output:
+        entities:
+          - EMAIL_ADDRESS
+          - PHONE_NUMBER
+          - CREDIT_CARD
+  input:
+    flows:
+      - detect sensitive data on input
+  output:
+    flows:
+      - mask sensitive data on output
