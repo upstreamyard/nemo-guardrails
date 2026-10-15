@@ -1,0 +1,10 @@
+# Deliberately broken: the input rail flow name has a typo. Used by the smoke test.
+models:
+  - type: main
+    engine: openai
+    model: mock-model
+
+rails:
+  input:
+    flows:
+      - self check inptu

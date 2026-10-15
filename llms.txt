@@ -1,0 +1,34 @@
+# upstreamyard/nemo-guardrails
+
+> NeMo Guardrails Docker image: multi-arch (amd64, arm64), cosign-signed container images of the NVIDIA NeMo Guardrails server (open-source `nemoguardrails server`, 0.24), an OpenAI-compatible LLM guardrails API on port 8000, with a matching NeMo Guardrails Helm chart for Kubernetes. Works out of the box: a default configuration with self check input and output rails (OpenAI `gpt-4o-mini`, or any OpenAI-compatible server via `MAIN_MODEL_BASE_URL`), so plain OpenAI clients need no extra fields. Non-root (UID 10001), read-only root filesystem, embedding and language detection models included (works air-gapped), Chat UI off and conversation content kept out of the logs by default, OpenTelemetry traces and metrics via `OTEL_EXPORTER_OTLP_ENDPOINT`, and a `check-config` command that validates configurations without calling an LLM. Community-maintained by upstreamyard; not an official NVIDIA image. Pull `upstreamyard/nemo-guardrails:<version>` or `ghcr.io/upstreamyard/nemo-guardrails:<version>`.
+
+Key facts: mount your NeMo Guardrails configuration (config.yml, prompts, Colang, actions.py) at `/config`; one configuration at the top level has the id `config` (the default), several go in sub-folders and are chosen with `"guardrails": {"config_id": "<id>"}` or `--default-config-id`. Requests need a `model` field. Probes: `GET /v1/health` (liveness only; configurations load on first use). The server has no authentication. Env vars: `OPENAI_API_KEY`, `NVIDIA_API_KEY`, `MAIN_MODEL_ENGINE`, `MAIN_MODEL_BASE_URL`, `NEMO_GUARDRAILS_DISABLE_CHAT_UI` (default `true`), `NEMO_GUARDRAILS_LOG_LEVEL` (default `WARNING`), `NEMO_GUARDRAILS_NO_USAGE_STATS`, `NEMO_GUARDRAILS_SERVER_ENABLE_CORS`. Tags: `0.24.1`, `0.24`, `latest`.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/README.md): quick start, default configuration, own configurations, check-config, environment variables, server options, streaming, OpenTelemetry, Kubernetes, extending, FAQ
+- [AGENTS.md](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/AGENTS.md): image facts table, deployment rules, repository conventions
+
+## Examples
+
+- [docker-compose.yml](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/docker-compose.yml): NeMo Guardrails with OpenAI
+- [examples/ollama/docker-compose.yml](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/examples/ollama/docker-compose.yml): fully local with Ollama and the Chat UI
+- [examples/pii-detection/Dockerfile](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/examples/pii-detection/Dockerfile): image with Presidio PII detection, and its [config](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/examples/pii-detection/config/config.yml)
+- [examples/langchain/Dockerfile](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/examples/langchain/Dockerfile): image with LangChain providers (Anthropic), and its [config](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/examples/langchain/config/config.yml)
+- [Helm chart](https://raw.githubusercontent.com/upstreamyard/helm-charts/main/charts/nemo-guardrails/README.md): NeMo Guardrails on Kubernetes; `helm repo add upstreamyard https://upstreamyard.github.io/helm-charts`
+
+## Configuration reference
+
+- [Default config.yml](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/config/config.yml) and [prompts.yml](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/config/prompts.yml)
+- [NeMo Guardrails configuration](https://docs.nvidia.com/nemo/guardrails/configure-guardrails/yaml-schema): config.yml reference
+- [Model configuration](https://docs.nvidia.com/nemo/guardrails/configure-guardrails/yaml-schema/model-configuration): engines, providers, keys
+- [Guardrail catalog](https://docs.nvidia.com/nemo/guardrails/configure-guardrails/guardrail-catalog): built-in rails
+- [Custom actions](https://docs.nvidia.com/nemo/guardrails/configure-guardrails/actions/creating-actions): actions.py
+
+## Optional
+
+- [Build workflow](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/.github/workflows/build.yml): how images are built, tested, signed and published
+- [Dockerfile](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/Dockerfile)
+- [Entrypoint](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/docker-entrypoint.sh)
+- [check-config](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/python/check-config)
+- [Smoke test](https://raw.githubusercontent.com/upstreamyard/nemo-guardrails/main/tests/smoke-test.sh)

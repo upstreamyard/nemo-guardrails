@@ -1,0 +1,54 @@
+#!/opt/venv/bin/python
+"""Checks NeMo Guardrails configurations without calling an LLM (upstreamyard image).
+
+Usage: check-config [folder]   (default: /config)
+
+Builds each configuration the way the server does on the first request that uses it,
+so errors such as unknown rail flows, Colang syntax errors or broken actions.py files
+show up before deployment. A folder with config.yml is one configuration; otherwise
+each sub-folder with a config.yml is one. Exits with 1 if any configuration fails.
+"""
+
+import os
+import sys
+
+# A check is not a deployment: don't send usage telemetry to NVIDIA for it.
+os.environ.setdefault("NEMO_GUARDRAILS_NO_USAGE_STATS", "true")
+
+from nemoguardrails import LLMRails, RailsConfig  # noqa: E402
+
+
+def has_config_file(path: str) -> bool:
+    return any(
+        os.path.exists(os.path.join(path, *name))
+        for name in (("config.yml",), ("config.yaml",), ("config", "config.yml"), ("config", "config.yaml"))
+    )
+
+
+def main() -> int:
+    root = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else "/config")
+    if has_config_file(root):
+        configs = {os.path.basename(root): root}
+    else:
+        configs = {
+            name: os.path.join(root, name)
+            for name in sorted(os.listdir(root))
+            if name[0] not in "._" and os.path.isdir(os.path.join(root, name)) and has_config_file(os.path.join(root, name))
+        }
+    if not configs:
+        print(f"FAILED: no configuration (config.yml) found in {root}")
+        return 1
+
+    failed = 0
+    for config_id, path in configs.items():
+        try:
+            LLMRails(RailsConfig.from_path(path))
+            print(f"ok     {config_id}")
+        except Exception as ex:  # report every configuration, not just the first error
+            print(f"FAILED {config_id}: {type(ex).__name__}: {ex}")
+            failed += 1
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,39 @@
+# NeMo Guardrails with a local model in Ollama; no API key, nothing leaves your machine.
+#   docker compose up -d   (the first start downloads the model, ~1 GB)
+# Small models are weak guards: qwen2.5:1.5b blocked a harmful request in our test but
+# let a prompt injection through. Use a larger model for real checks.
+services:
+  ollama:
+    image: ollama/ollama:0.12.6
+    restart: unless-stopped
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      retries: 20
+
+  ollama-pull:
+    image: ollama/ollama:0.12.6
+    environment:
+      OLLAMA_HOST: ollama:11434
+    command: ["pull", "qwen2.5:1.5b"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  nemo-guardrails:
+    image: upstreamyard/nemo-guardrails:0.24
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      NEMO_GUARDRAILS_DISABLE_CHAT_UI: "false"
+    volumes:
+      - ./config:/config:ro
+    depends_on:
+      ollama-pull:
+        condition: service_completed_successfully
+
+volumes:
+  ollama:

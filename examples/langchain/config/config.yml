@@ -1,0 +1,14 @@
+# Anthropic as the main model through LangChain. Needs the image from ../Dockerfile and
+# ANTHROPIC_API_KEY. Model names: https://docs.anthropic.com/en/docs/about-claude/models
+models:
+  - type: main
+    engine: anthropic
+    model: claude-haiku-4-5
+
+rails:
+  input:
+    flows:
+      - self check input
+  output:
+    flows:
+      - self check output

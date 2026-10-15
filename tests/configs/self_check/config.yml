@@ -1,0 +1,25 @@
+# Default NeMo Guardrails configuration of the upstreamyard image (single-config mode,
+# config id "config"). Replace it by mounting your own configuration at /config.
+#
+# The main model checks every user message and every answer ("self check" rails) and
+# writes the answers. A request's `model` field replaces the model name below; the
+# MAIN_MODEL_ENGINE and MAIN_MODEL_BASE_URL environment variables replace the engine and
+# the endpoint, e.g. for vLLM, Ollama or NVIDIA NIM.
+models:
+  - type: main
+    engine: openai
+    model: gpt-4o-mini
+
+rails:
+  input:
+    flows:
+      - self check input
+  output:
+    flows:
+      - self check output
+    # Lets clients stream answers (`"stream": true`). The output rail checks each chunk
+    # of about 200 tokens before it is sent (stream_first: false). NeMo Guardrails'
+    # default, stream_first: true, sends chunks first and checks them afterwards.
+    streaming:
+      enabled: true
+      stream_first: false

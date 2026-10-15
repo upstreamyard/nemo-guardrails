@@ -1,0 +1,8 @@
+define flow check blocked words
+  $allowed = execute check_blocked_words(text=$user_message)
+  if not $allowed
+    bot refuse blocked word
+    stop
+
+define bot refuse blocked word
+  "Blocked by a custom action."

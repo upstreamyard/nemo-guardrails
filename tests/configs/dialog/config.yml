@@ -1,0 +1,10 @@
+# Dialog rails that match user messages by embeddings only (FastEmbed, all-MiniLM-L6-v2).
+models:
+  - type: main
+    engine: openai
+    model: mock-model
+
+rails:
+  dialog:
+    user_messages:
+      embeddings_only: true
