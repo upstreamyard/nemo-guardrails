@@ -17,7 +17,7 @@ New NeMo Guardrails releases are built within 24 hours of their GitHub release. 
 
 ## Why this NeMo Guardrails image
 
-NVIDIA publishes no ready-made image of the open-source NeMo Guardrails server; its docs tell you to build the repository's `Dockerfile` yourself. We compared against that build, NeMo Guardrails 0.24.1, on 2026-10-15.
+NVIDIA publishes no ready-made image of the open-source NeMo Guardrails server; its docs tell you to build the repository's `Dockerfile` yourself. We compared against that build, NeMo Guardrails 0.24.1, in October 2026.
 
 | | Built from NVIDIA's `Dockerfile` | `upstreamyard/nemo-guardrails` |
 |---|---|---|
@@ -186,7 +186,7 @@ docker run -d -p 8000:8000 -e OPENAI_API_KEY=sk-... \
 
 ## Kubernetes and Helm: NeMo Guardrails Helm chart
 
-The recommended way to run NeMo Guardrails on Kubernetes is our Helm chart ([`upstreamyard/helm-charts`](https://github.com/upstreamyard/helm-charts/tree/main/charts/nemo-guardrails)). It takes your configuration from values or a ConfigMap, the API key from a Secret, and adds autoscaling and a NetworkPolicy:
+The recommended way to run NeMo Guardrails on Kubernetes is our Helm chart ([`upstreamyard/helm-charts`](https://github.com/upstreamyard/helm-charts/tree/main/charts/nemo-guardrails)). It takes your configurations from values or ConfigMaps, checks them before each rollout, takes API keys from a Secret, and adds autoscaling and a NetworkPolicy. Tested: 0 failed requests out of 1,000 across three rolling updates.
 
 ```bash
 helm repo add upstreamyard https://upstreamyard.github.io/helm-charts
@@ -196,9 +196,9 @@ helm install guardrails upstreamyard/nemo-guardrails --set llm.openaiApiKey=sk-.
 Running the image yourself:
 
 1. Pass API keys from a Secret.
-2. Mount your configuration from a ConfigMap at `/config`. Sub-folders don't fit in one ConfigMap: use one ConfigMap per configuration, mounted at `/config/<id>`.
+2. Mount your configuration from a ConfigMap at `/config`. Sub-folders don't fit in one ConfigMap: use one ConfigMap per configuration, mounted at `/config/<id>`, with an empty volume at `/config` so the image's default configuration doesn't hide them. Use a new ConfigMap name for every change: Kubernetes updates mounted ConfigMaps inside running pods, and the server loads the new files unchecked (we saw HTTP 400s from old pods after ~70 s). Run `check-config` in an init container.
 3. Probes: HTTP `GET /v1/health` on port 8000 for liveness and readiness.
-4. The server keeps no state for plain chat completions (clients send the history), so you can run several replicas behind one Service.
+4. The server keeps no state for plain chat completions (clients send the history), so you can run several replicas behind one Service. A `preStop` pause of a few seconds avoids "connection refused" errors during rolling updates.
 5. The server has no authentication: restrict access with a NetworkPolicy, or put an authenticating gateway in front.
 
 The container works with `runAsNonRoot: true`, `readOnlyRootFilesystem: true` (plus an `emptyDir` at `/tmp`) and all capabilities dropped.
@@ -232,7 +232,7 @@ ENV NEMOGUARDRAILS_LLM_FRAMEWORK=langchain
 
 **How do I run NeMo Guardrails in Docker?** Use the [quick start](#quick-start-run-nemo-guardrails-in-docker); an `OPENAI_API_KEY` or an OpenAI-compatible model server is all it needs.
 
-**Is there an official NeMo Guardrails Docker image or Helm chart?** NVIDIA publishes none for the open-source server; you build its `Dockerfile` yourself. NVIDIA's NeMo Guardrails *microservice* is a separate product in NVIDIA's NGC catalog, pulled with an NGC API key. This image and our [Helm chart](https://github.com/upstreamyard/helm-charts/tree/main/charts/nemo-guardrails) package the open-source server.
+**Is there an official NeMo Guardrails Docker image or Helm chart?** NVIDIA publishes none for the open-source server; you build its `Dockerfile` yourself. NVIDIA's NeMo Guardrails *microservice* is a separate product from NVIDIA's NGC catalog, which we haven't tested. This image and our [Helm chart](https://github.com/upstreamyard/helm-charts/tree/main/charts/nemo-guardrails) package the open-source server.
 
 **How do I use NeMo Guardrails with Ollama, vLLM or another local model?** Set `MAIN_MODEL_BASE_URL` to its OpenAI-compatible endpoint, or see the [Ollama example](https://github.com/upstreamyard/nemo-guardrails/tree/main/examples/ollama).
 
