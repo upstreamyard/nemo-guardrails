@@ -1,3 +1,5 @@
+<img src="https://upstreamyard.github.io/helm-charts/logo.png" alt="upstreamyard logo" width="120" align="right">
+
 # NeMo Guardrails Docker image (NVIDIA NeMo Guardrails 0.24)
 
 Production-ready, multi-arch (`amd64`, `arm64`) and signed **NeMo Guardrails Docker image**: the NVIDIA NeMo Guardrails server, an **OpenAI-compatible LLM guardrails API** that checks every user message and every model answer before it passes. Point any OpenAI client at it and you get input and output rails (jailbreak and content checks), dialog rails and PII masking in front of OpenAI, NVIDIA NIM, Azure OpenAI, vLLM, Ollama or any OpenAI-compatible model server. It **works out of the box** with a default self-check configuration, runs as non-root with a read-only root filesystem, works **air-gapped** (models included), **keeps prompts out of your logs** by default, and exports **OpenTelemetry traces** with environment variables only. Use it with Docker, Docker Compose, or Kubernetes via our **[NeMo Guardrails Helm chart](https://github.com/upstreamyard/helm-charts/tree/main/charts/nemo-guardrails)**.
