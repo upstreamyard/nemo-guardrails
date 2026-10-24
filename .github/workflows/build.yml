@@ -83,10 +83,10 @@ jobs:
       DOCKERHUB_ENABLED: ${{ secrets.DOCKERHUB_TOKEN != '' }}
       QUAY_ENABLED: ${{ secrets.QUAY_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check out NeMo Guardrails v${{ env.VERSION }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.UPSTREAM_REPO }}
           ref: v${{ env.VERSION }}
