@@ -41,12 +41,15 @@ RUN mkdir -p nemoguardrails/examples && cp -r examples/bots nemoguardrails/examp
 
 # OpenTelemetry SDK and OTLP exporter, so traces and metrics can be exported with
 # OTEL_* environment variables only (see docker-entrypoint.sh).
-ARG OTEL_SDK_VERSION=1.43.0
-ARG OTEL_DISTRO_VERSION=0.64b0
-RUN uv pip install --python /opt/venv/bin/python \
-    "opentelemetry-sdk==${OTEL_SDK_VERSION}" \
-    "opentelemetry-exporter-otlp-proto-http==${OTEL_SDK_VERSION}" \
-    "opentelemetry-distro==${OTEL_DISTRO_VERSION}"
+# Versions come from NeMo Guardrails' lockfile: other versions would replace locked
+# OpenTelemetry packages and leave a mix that breaks imports (e.g. Chainlit, the Chat UI).
+RUN locked() { awk -v n="\"$1\"" '$1 == "name" && $3 == n { getline; gsub(/"/, "", $3); print $3; exit }' uv.lock; } && \
+    sdk=$(locked opentelemetry-sdk) && instrumentation=$(locked opentelemetry-instrumentation) && \
+    test -n "$sdk" && test -n "$instrumentation" && \
+    uv pip install --python /opt/venv/bin/python \
+    "opentelemetry-sdk==${sdk}" \
+    "opentelemetry-exporter-otlp-proto-http==${sdk}" \
+    "opentelemetry-distro==${instrumentation}"
 
 # Models NeMo Guardrails would otherwise download on first use, so air-gapped clusters
 # work: the default embedding model (all-MiniLM-L6-v2: dialog rails, knowledge bases) and

@@ -80,7 +80,7 @@ Rules:
 - Do not modify NeMo Guardrails' source; fix packaging in the `Dockerfile`. Report NeMo Guardrails bugs to the user rather than filing them.
 - Known NeMo Guardrails behaviours this image works around or documents: the server always logs conversation content (hard-coded verbose mode), `--prefix` breaks single-configuration mode, the package needs `examples/bots` copied in (as NVIDIA's `build.sh` does), Chainlit writes to its app root on import even when the Chat UI is off (`CHAINLIT_APP_ROOT=/tmp`).
 - Keep the image non-root with UID `10001`, and keep `HEALTHCHECK` and the OCI labels.
-- When the OpenTelemetry SDK version changes, keep `OTEL_SDK_VERSION` and `OTEL_DISTRO_VERSION` matched (SDK `1.N.0` ↔ distro `0.(N+21)b0`) and compatible with the `opentelemetry-api` in NeMo Guardrails' lockfile.
+- The OpenTelemetry SDK, OTLP exporter and distro are installed at the versions in NeMo Guardrails' `uv.lock` (`opentelemetry-sdk`, and `opentelemetry-instrumentation` for the distro). Don't pin other versions: they replace locked packages and break imports (seen with 0.25.0: Chainlit failed to import, so the Chat UI was missing).
 - When ports, env vars, commands or the config layout change, update `README.md`, this file and `llms.txt` in the same pull request.
 - The workflow must pass `actionlint` (`docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint:latest`).
 - `README.md` is also the Docker Hub description, so keep it under 25,000 characters.
